@@ -38,22 +38,18 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- Database Drivers -->
-        <!-- MySQL (local use) -->
+        <!-- PostgreSQL Driver (Render deployment + local if using Postgres) -->
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- PostgreSQL (Render deployment) -->
+        <!-- HikariCP (connection pool, needed for Postgres in production) -->
         <dependency>
-  <groupId>org.postgresql</groupId>
-  <artifactId>postgresql</artifactId>
-  <version>42.7.4</version>
-  <scope>runtime</scope>
-</dependency>
-
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
 
         <!-- Dev tools -->
         <dependency>
