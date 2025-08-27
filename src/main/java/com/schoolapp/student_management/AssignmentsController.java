@@ -7,18 +7,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/assignments")
-@CrossOrigin(origins = "*")
 public class AssignmentsController {
 
     @Autowired
     private AssignmentsService service;
 
-    // ✅ Changed path from "/upload" to just POST at root ("/api/assignments")
+    // ✅ Upload assignment with file
     @PostMapping
     public ResponseEntity<String> uploadAssignment(
             @RequestParam("className") String className,
@@ -36,10 +34,11 @@ public class AssignmentsController {
             assignment.setStream(stream);
             assignment.setSubject(subject);
             assignment.setTeacher(teacher);
-            assignment.setDate(Date.valueOf(dateStr)); // parsing "YYYY-MM-DD"
+            assignment.setDate(Date.valueOf(dateStr)); // expects "YYYY-MM-DD"
             assignment.setWorktodo(fileData);
 
             service.saveAssignment(assignment);
+
             return ResponseEntity.ok("✅ Assignment uploaded successfully.");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -50,11 +49,13 @@ public class AssignmentsController {
         }
     }
 
+    // ✅ Get all assignments
     @GetMapping
     public List<Assignments> getAllAssignments() {
         return service.getAllAssignments();
     }
 
+    // ✅ Download assignment file
     @GetMapping("/download/{id}")
     public ResponseEntity<byte[]> downloadAssignment(@PathVariable Long id) {
         Assignments assignment = service.getAssignmentById(id);
@@ -64,8 +65,11 @@ public class AssignmentsController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDisposition(ContentDisposition.attachment()
-                .filename("assignment_" + id + ".doc").build());
+
+        // Give a more meaningful filename (subject + id)
+        String filename = assignment.getSubject() + "_assignment_" + id + ".bin";
+        headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
+        headers.setContentLength(assignment.getWorktodo().length);
 
         return new ResponseEntity<>(assignment.getWorktodo(), headers, HttpStatus.OK);
     }
