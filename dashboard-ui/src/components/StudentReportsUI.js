@@ -1,5 +1,8 @@
-// StudentReportsUI.js
+// File: StudentReportsUI.js
 import React, { useState, useEffect } from "react";
+//import { apiGet } from "../api";   // ✅ centralized API helpers
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import "./StudentReportsUI.css";
 
 export default function StudentReportsUI() {
@@ -21,50 +24,49 @@ export default function StudentReportsUI() {
     }
   }, [activeTab]);
 
-  const fetchAssignments = () => {
-    setLoading(true);
-    fetch(`http://localhost:8080/api/assignments?class=${className}&stream=${stream}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setAssignments(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching assignments:", err);
-        setLoading(false);
-      });
+  const fetchAssignments = async () => {
+    try {
+      setLoading(true);
+      const data = await apiGet(`/api/assignments?class=${className}&stream=${stream}`);
+      setAssignments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("❌ Error fetching assignments:", err);
+      setAssignments([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchAssessmentResults = () => {
+  const fetchAssessmentResults = async () => {
     if (!admissionNo) return;
-    setLoading(true);
-    // UPDATED: now points to new student endpoint
-    fetch(`http://localhost:8080/student/assessments/list?studentid=${admissionNo}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setAssessmentData(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching assessments:", err);
-        setLoading(false);
-      });
+    try {
+      setLoading(true);
+      const data = await apiGet(`/student/assessments/list?studentid=${admissionNo}`);
+      setAssessmentData(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("❌ Error fetching assessments:", err);
+      setAssessmentData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDownload = (id) => {
-    fetch(`http://localhost:8080/api/assignments/download/${id}`)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `assignment_${id}.doc`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((err) => console.error("Error downloading file:", err));
+  const handleDownload = async (id) => {
+    try {
+      // ✅ still use fetch directly here, since api.js expects JSON but download is blob
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ""}/api/assignments/download/${id}`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `assignment_${id}.doc`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("❌ Error downloading file:", err);
+    }
   };
 
   return (

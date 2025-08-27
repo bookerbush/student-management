@@ -1,4 +1,8 @@
+// File: MessageForm.js
 import React, { useState } from "react";
+//import { apiGet, apiPost } from "../api";
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import "./MessageForm.css";
 
 const MessageForm = () => {
@@ -13,38 +17,30 @@ const MessageForm = () => {
   });
 
   const [status, setStatus] = useState("");
-  const [messageCount, setMessageCount] = useState(0); // ✅ Track total messages sent
+  const [messageCount, setMessageCount] = useState(0);
 
   // Fetch student details from backend
   const fetchStudentDetails = async (admissionNumber) => {
     if (!admissionNumber.trim()) return;
 
     try {
-      const res = await fetch(
-        `http://localhost:8080/students/by-adm/${admissionNumber}`
-      );
-
-      if (res.ok) {
-        const student = await res.json();
-        setFormData((prev) => ({
-          ...prev,
-          name: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
-          className: student.classEnrolled || "",
-          stream: student.stream || "",
-        }));
-        setStatus(""); // clear any old error
-      } else {
-        setStatus("⚠️ No student found");
-        setFormData((prev) => ({
-          ...prev,
-          name: "",
-          className: "",
-          stream: "",
-        }));
-      }
+      const student = await apiGet(`/students/by-adm/${admissionNumber}`);
+      setFormData((prev) => ({
+        ...prev,
+        name: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
+        className: student.classEnrolled || "",
+        stream: student.stream || "",
+      }));
+      setStatus(""); // clear error
     } catch (err) {
       console.error("Error fetching student:", err);
-      setStatus("❌ Error fetching student");
+      setStatus("⚠️ No student found");
+      setFormData((prev) => ({
+        ...prev,
+        name: "",
+        className: "",
+        stream: "",
+      }));
     }
   };
 
@@ -58,10 +54,9 @@ const MessageForm = () => {
     }
   };
 
-  // Only trigger search when pressing Enter on admission number field
   const handleAdmissionKeyDown = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // stop form submit
+      e.preventDefault();
       fetchStudentDetails(formData.admissionNumber);
     }
   };
@@ -82,11 +77,11 @@ const MessageForm = () => {
           "Kindly enter admission number for student you wish the parents to receive the message"
         );
         document.querySelector("input[name='admissionNumber']").focus();
-        return; // stop sending
+        return;
       }
     }
 
-    // 2️⃣ Check for "General" but fields have data
+    // 2️⃣ Validation for "General" with extra fields filled
     if (formData.messageType === "General") {
       if (
         formData.admissionNumber.trim() ||
@@ -101,7 +96,7 @@ const MessageForm = () => {
           alert(
             "If your intention was to send a general message, then clear these fields or choose the 'Particular' option."
           );
-          return; // stop sending
+          return;
         }
       }
     }
@@ -116,35 +111,27 @@ const MessageForm = () => {
         }
       });
 
-      const res = await fetch("http://localhost:8080/messages", {
-        method: "POST",
-        body: data,
+      await apiPost("/messages", data); // ✅ using centralized API
+
+      setMessageCount((prev) => prev + 1);
+      setStatus(
+        `✅ Message sent successfully! (Total sent: ${messageCount + 1})`
+      );
+
+      // Reset form
+      setFormData({
+        admissionNumber: "",
+        name: "",
+        className: "",
+        stream: "",
+        msg: "",
+        messageType: "General",
+        image: null,
       });
-
-      if (res.ok) {
-        // Increment counter and show simple success
-        setMessageCount((prev) => prev + 1);
-        setStatus(
-          `✅ Message sent successfully! (Total sent: ${messageCount + 1})`
-        );
-
-        // Reset form
-        setFormData({
-          admissionNumber: "",
-          name: "",
-          className: "",
-          stream: "",
-          msg: "",
-          messageType: "General",
-          image: null,
-        });
-        document.getElementById("image").value = null;
-      } else {
-        setStatus("❌ Failed to send message");
-      }
+      document.getElementById("image").value = null;
     } catch (err) {
-      console.error(err);
-      setStatus("⚠️ Error connecting to server");
+      console.error("Error sending message:", err);
+      setStatus("❌ Failed to send message");
     }
   };
 

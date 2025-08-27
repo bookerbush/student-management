@@ -1,5 +1,5 @@
-
 package com.schoolapp.student_management;
+
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -16,7 +16,7 @@ public class Assignments {
     private String subject;
 
     @Lob
-    @Column(name = "worktodo", columnDefinition = "LONGBLOB")
+    @Column(name = "worktodo") // ✅ removed MySQL-specific columnDefinition
     private byte[] worktodo;
 
     @Temporal(TemporalType.DATE)

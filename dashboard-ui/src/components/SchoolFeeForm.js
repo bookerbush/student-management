@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+//import api from '../api';  // ✅ centralized axios instance
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import './SchoolFeeForm.css';
 
 const initialRow = {
   itemDescription: '',
   pp0Fee: '',
-  pp12Fee: '',          // ✅ renamed to match backend field
+  pp12Fee: '',
   grade13Fee: '',
   grade46Fee: '',
   remarks: '',
@@ -33,7 +36,7 @@ const SchoolFeeForm = () => {
       const fieldOrder = [
         'itemDescription',
         'pp0Fee',
-        'pp12Fee',        // ✅ updated here
+        'pp12Fee',
         'grade13Fee',
         'grade46Fee',
         'remarks'
@@ -58,22 +61,21 @@ const SchoolFeeForm = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const filteredRows = rows.filter(row => row.itemDescription.trim() !== '');
-    fetch('http://localhost:8080/fees/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(filteredRows)
-    })
-      .then(res => {
-        if (res.ok) {
-          setMessage('✅ Fee items saved successfully.');
-          setRows([{ ...initialRow }]);
-        } else {
-          throw new Error('Failed');
-        }
-      })
-      .catch(() => setMessage('❌ Failed to save fee items.'));
+
+    try {
+      const res = await apiPost('/fees/save', filteredRows);
+      if (res.status === 200) {
+        setMessage('✅ Fee items saved successfully.');
+        setRows([{ ...initialRow }]);
+      } else {
+        throw new Error('Failed');
+      }
+    } catch (err) {
+      console.error('❌ Failed to save fee items:', err);
+      setMessage('❌ Failed to save fee items.');
+    }
   };
 
   return (
@@ -107,7 +109,7 @@ const SchoolFeeForm = () => {
                 onKeyDown={e => handleKeyDown(e, rowIndex, 'pp0Fee')}
               /></td>
               <td><input
-                id={`input-${rowIndex}-pp12Fee`}   // ✅ renamed input ID
+                id={`input-${rowIndex}-pp12Fee`}
                 type="number"
                 value={row.pp12Fee}
                 onChange={e => handleChange(rowIndex, 'pp12Fee', e.target.value)}

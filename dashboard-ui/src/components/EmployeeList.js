@@ -1,6 +1,8 @@
 // File: EmployeeList.js
 import React, { useEffect, useState } from "react";
 import "./EmployeeList.css";
+import axios from "axios";
+import { API_BASE_URL } from "../config";   // ✅ use correct export
 
 export const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
@@ -8,19 +10,18 @@ export const EmployeeList = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/employees")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch employees");
-        return res.json();
-      })
-      .then((data) => {
-        setEmployees(data);
+    const fetchEmployees = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/employees`); // ✅ fixed
+        setEmployees(res.data);
         setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
+      } catch (err) {
+        setError(err.message || "Failed to fetch employees");
         setLoading(false);
-      });
+      }
+    };
+
+    fetchEmployees();
   }, []);
 
   if (loading) return <p>Loading staff report...</p>;

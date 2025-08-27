@@ -1,6 +1,7 @@
 // File: EmployeeForm.js
 import React, { useState } from "react";
 import "./EmployeeForm.css";
+import { API_BASE_URL } from "../config";   // ✅ correct import
 
 function EmployeeForm() {
   const [formData, setFormData] = useState({
@@ -44,7 +45,8 @@ function EmployeeForm() {
     });
 
     try {
-      const empRes = await fetch("http://localhost:8080/api/employees", {
+      // ✅ Step 1: Save employee
+      const empRes = await fetch(`${API_BASE_URL}/employees`, {
         method: "POST",
         body: empForm,
       });
@@ -57,7 +59,7 @@ function EmployeeForm() {
 
       const savedEmp = await empRes.json();
 
-      // Step 2: Save user
+      // ✅ Step 2: Save user
       const userPayload = {
         username: formData.nationalid,
         password: formData.nationalid,
@@ -67,7 +69,7 @@ function EmployeeForm() {
         status: "ACTIVE",
       };
 
-      await fetch("http://localhost:8080/api/users/create", {
+      await fetch(`${API_BASE_URL}/users/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userPayload),
@@ -98,7 +100,6 @@ function EmployeeForm() {
     <div className="employee-form-container">
       <h2 className="form-title">Employees Registration Form</h2>
       <form onSubmit={handleSubmit} className="employee-form">
-
         <label>Full Name:</label>
         <input type="text" name="fullname" value={formData.fullname} onChange={handleChange} required />
 

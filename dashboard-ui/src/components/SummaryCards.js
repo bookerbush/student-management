@@ -1,5 +1,7 @@
+// File: SummaryCards.js
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+//import api from "../api";   // ✅ use centralized api.js
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
 
 export const SummaryCards = () => {
   const [counts, setCounts] = useState({
@@ -10,7 +12,7 @@ export const SummaryCards = () => {
 
   const fetchSummary = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/students/summary");
+      const res = await apiGet("/students/summary"); // ✅ consistent usage
       setCounts(res.data);
     } catch (err) {
       console.error("❌ Failed to fetch student summary", err);

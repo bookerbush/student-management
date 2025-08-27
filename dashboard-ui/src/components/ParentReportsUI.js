@@ -1,5 +1,9 @@
+// File: ParentReportsUI.js
 import React, { useState, useEffect } from "react";
 import ParentMessagesView from "./ParentMessagesView";
+//import { apiGet } from "../api";  // ✅ use centralized axios instance
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import "./ParentReportsUI.css";
 
 export default function ParentReportsUI({ admissionNo }) {
@@ -11,46 +15,46 @@ export default function ParentReportsUI({ admissionNo }) {
   const [attendanceData, setAttendanceData] = useState([]);
   const [selectedClassGroup, setSelectedClassGroup] = useState("grade13");
 
+  // ✅ Fee Balance
   useEffect(() => {
     if (admissionNo) {
-      fetch(`http://localhost:8080/payments/balance?studentid=${admissionNo}&studyyear=2025`)
-        .then((res) => res.json())
-        .then((data) => setBalanceData(data))
-        .catch((err) => console.error("Error fetching balance:", err));
+      apiGet(`/payments/balance?studentid=${admissionNo}&studyyear=2025`)
+        .then(setBalanceData)
+        .catch(err => console.error("Error fetching balance:", err));
     }
   }, [admissionNo]);
 
+  // ✅ Fee Statement
   useEffect(() => {
     if (admissionNo) {
-      fetch(`http://localhost:8080/payments/statement?studentid=${admissionNo}&studyyear=2025`)
-        .then((res) => res.json())
-        .then((data) => setStatementData(data))
-        .catch((err) => console.error("Error fetching statement:", err));
+      apiGet(`/payments/statement?studentid=${admissionNo}&studyyear=2025`)
+        .then(setStatementData)
+        .catch(err => console.error("Error fetching statement:", err));
     }
   }, [admissionNo]);
 
+  // ✅ Assessments
   useEffect(() => {
     if (admissionNo) {
-      fetch(`http://localhost:8080/parent/assessments/list?studentid=${admissionNo}`)
-        .then((res) => res.json())
-        .then((data) => setAssessmentData(data))
-        .catch((err) => console.error("Error fetching assessments:", err));
+      apiGet(`/parent/assessments/list?studentid=${admissionNo}`)
+        .then(setAssessmentData)
+        .catch(err => console.error("Error fetching assessments:", err));
     }
   }, [admissionNo]);
 
+  // ✅ Fee Structure
   useEffect(() => {
-    fetch(`http://localhost:8080/parentdata/feestructure`)
-      .then((res) => res.json())
-      .then((data) => setFeeStructureData(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Error fetching fee structure:", err));
+    apiGet(`/parentdata/feestructure`)
+      .then(data => setFeeStructureData(Array.isArray(data) ? data : []))
+      .catch(err => console.error("Error fetching fee structure:", err));
   }, []);
 
+  // ✅ Attendance
   useEffect(() => {
     if (admissionNo) {
-      fetch(`http://localhost:8080/parentdata/attendance/list?studentid=${admissionNo}`)
-        .then((res) => res.json())
-        .then((data) => setAttendanceData(Array.isArray(data) ? data : []))
-        .catch((err) => console.error("Error fetching attendance:", err));
+      apiGet(`/parentdata/attendance/list?studentid=${admissionNo}`)
+        .then(data => setAttendanceData(Array.isArray(data) ? data : []))
+        .catch(err => console.error("Error fetching attendance:", err));
     }
   }, [admissionNo]);
 
@@ -269,7 +273,7 @@ export default function ParentReportsUI({ admissionNo }) {
           </div>
         )}
 
-        {/* ✅ Now pass admissionNo into ParentMessages */}
+        {/* ✅ Messages Section */}
         {activeTab === "messages" && <ParentMessages admissionNo={admissionNo} />}
       </div>
 
@@ -280,7 +284,7 @@ export default function ParentReportsUI({ admissionNo }) {
   );
 }
 
-/* ✅ Updated ParentMessages to receive admissionNo and pass to ParentMessagesView */
+/* ✅ ParentMessages wrapper */
 function ParentMessages({ admissionNo }) {
   const [subTab, setSubTab] = useState("view");
 

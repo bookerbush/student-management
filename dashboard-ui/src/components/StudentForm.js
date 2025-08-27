@@ -1,70 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import './StudentForm.css';
+// File: StudentForm.js
+import React, { useState, useEffect } from "react";
+//import api from "../api"; // ✅ centralized API instance
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
+import "./StudentForm.css";
 
 const StudentForm = () => {
   const [formData, setFormData] = useState({
     // Basic Info
-    studentId: '', firstName: '', middleName: '', lastName: '',
-    gender: '', dateOfBirth: '', placeOfBirth: '', nationality: 'Kenyan',
+    studentId: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    gender: "",
+    dateOfBirth: "",
+    placeOfBirth: "",
+    nationality: "Kenyan",
 
     // Parent/Guardian
-    fatherName: '', fatherPhone: '', motherName: '', motherPhone: '',
-    guardianName: '', guardianPhone: '', relationshipToStudent: '',
-    parentEmail: '', parentAddress: '',
+    fatherName: "",
+    fatherPhone: "",
+    motherName: "",
+    motherPhone: "",
+    guardianName: "",
+    guardianPhone: "",
+    relationshipToStudent: "",
+    parentEmail: "",
+    parentAddress: "",
 
     // Enrollment
-    admissionNumber: '', dateOfAdmission: '', classEnrolled: '',
-    stream: '', admissionType: '', studentType: '',
+    admissionNumber: "",
+    dateOfAdmission: "",
+    classEnrolled: "",
+    stream: "",
+    admissionType: "",
+    studentType: "",
 
     // Boarding
-    boardingStatus: false, dormitory: '', houseParent: '',
+    boardingStatus: false,
+    dormitory: "",
+    houseParent: "",
 
     // Health
-    medicalConditions: '', bloodGroup: '', emergencyContactName: '',
-    emergencyContactPhone: '', emergencyContactRelation: '',
+    medicalConditions: "",
+    bloodGroup: "",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+    emergencyContactRelation: "",
 
     // Other
-    religion: '', disabilityStatus: false, disabilityDescription: '',
-    passportPhoto: '', remarks: '', studentStatus: '',
+    religion: "",
+    disabilityStatus: false,
+    disabilityDescription: "",
+    passportPhoto: "",
+    remarks: "",
+    studentStatus: "",
   });
 
   const [imagePreview, setImagePreview] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
-  // ✅ FIXED: Auto-generate Student ID and Admission Number with "0001", "0002" formatting
-useEffect(() => {
-  const getNextStudentId = async () => {
-    try {
-      const response = await fetch("http://localhost:8080/students/latest-id");
-      const latestId = await response.json();
-      const nextId = latestId ? latestId + 1 : 1;
-      const formatted = String(nextId).padStart(4, '0');
-      setFormData(prev => ({
-        ...prev,
-        studentId: formatted,
-        admissionNumber: formatted
-      }));
-    } catch (error) {
-      console.error("Failed to fetch latest ID", error);
-    }
-  };
+  // ✅ Auto-generate Student ID and Admission Number ("0001", "0002", ...)
+  useEffect(() => {
+    const getNextStudentId = async () => {
+      try {
+        const res = await apiGet("/students/latest-id");
+        const latestId = res.data;
+        const nextId = latestId ? latestId + 1 : 1;
+        const formatted = String(nextId).padStart(4, "0");
+        setFormData((prev) => ({
+          ...prev,
+          studentId: formatted,
+          admissionNumber: formatted,
+        }));
+      } catch (error) {
+        console.error("Failed to fetch latest ID", error);
+      }
+    };
 
-  getNextStudentId();
-}, []);
-
+    getNextStudentId();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    if (type === 'file') {
+    if (type === "file") {
       const file = files[0];
-      setFormData(prev => ({ ...prev, passportPhoto: file }));
+      setFormData((prev) => ({ ...prev, passportPhoto: file }));
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : value
+        [name]: type === "checkbox" ? checked : value,
       }));
     }
   };
@@ -73,79 +101,106 @@ useEffect(() => {
     window.location.reload();
   };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // Remove the actual File from JSON stringified data
-  const dataToSend = { ...formData };
-  delete dataToSend.passportPhoto;
+    // Remove the actual File from JSON stringified data
+    const dataToSend = { ...formData };
+    delete dataToSend.passportPhoto;
 
-  const formDataToSend = new FormData();
-  formDataToSend.append("studentData", JSON.stringify(dataToSend));
-  if (formData.passportPhoto) {
-    formDataToSend.append("passportPhoto", formData.passportPhoto);
-  }
+    const formDataToSend = new FormData();
+    formDataToSend.append("studentData", JSON.stringify(dataToSend));
+    if (formData.passportPhoto) {
+      formDataToSend.append("passportPhoto", formData.passportPhoto);
+    }
 
-  fetch("http://localhost:8080/students/upload", {
-    method: "POST",
-    body: formDataToSend
-  })
-    .then(res => {
-      if (res.ok) {
-        setMessage("✅ Student saved successfully!");
+    try {
+      await apiPost("/students/upload", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-        // Fetch next auto-generated ID
-        fetch("http://localhost:8080/students/latest-id")
-          .then(res => res.json())
-          .then(data => {
-            const nextNumber = String(data + 1).padStart(4, '0');
-            setFormData(prev => ({
-              ...prev,
-              studentId: nextNumber,
-              admissionNumber: nextNumber,
-              // Clear the rest of the form except ID fields
-              firstName: '', middleName: '', lastName: '',
-              gender: '', dateOfBirth: '', placeOfBirth: '', nationality: 'Kenyan',
-              fatherName: '', fatherPhone: '', motherName: '', motherPhone: '',
-              guardianName: '', guardianPhone: '', relationshipToStudent: '',
-              parentEmail: '', parentAddress: '',
-              dateOfAdmission: '', classEnrolled: '',
-              stream: '', admissionType: '', studentType: '',
-              boardingStatus: false, dormitory: '', houseParent: '',
-              medicalConditions: '', bloodGroup: '',
-              emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '',
-              religion: '', disabilityStatus: false, disabilityDescription: '',
-              passportPhoto: '', remarks: '', studentStatus: ''
-            }));
-            setImagePreview(null);
-          });
-      } else {
-        throw new Error("Failed to save student");
-      }
-    })
-    .catch((error) => {
+      setMessage("✅ Student saved successfully!");
+
+      // Fetch next auto-generated ID
+      const res = await apiGet("/students/latest-id");
+      const latest = res.data;
+      const nextNumber = String((latest ?? 0) + 1).padStart(4, "0");
+
+      setFormData((prev) => ({
+        ...prev,
+        studentId: nextNumber,
+        admissionNumber: nextNumber,
+        // Clear the rest of the form except ID fields
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        gender: "",
+        dateOfBirth: "",
+        placeOfBirth: "",
+        nationality: "Kenyan",
+        fatherName: "",
+        fatherPhone: "",
+        motherName: "",
+        motherPhone: "",
+        guardianName: "",
+        guardianPhone: "",
+        relationshipToStudent: "",
+        parentEmail: "",
+        parentAddress: "",
+        dateOfAdmission: "",
+        classEnrolled: "",
+        stream: "",
+        admissionType: "",
+        studentType: "",
+        boardingStatus: false,
+        dormitory: "",
+        houseParent: "",
+        medicalConditions: "",
+        bloodGroup: "",
+        emergencyContactName: "",
+        emergencyContactPhone: "",
+        emergencyContactRelation: "",
+        religion: "",
+        disabilityStatus: false,
+        disabilityDescription: "",
+        passportPhoto: "",
+        remarks: "",
+        studentStatus: "",
+      }));
+      setImagePreview(null);
+    } catch (error) {
       console.error("❌ Submission error:", error);
       setMessage("❌ An error occurred while saving the student.");
-    });
-};
+    }
+  };
 
-
-
-  const renderInput = (label, name, type = 'text', options = []) => (
+  const renderInput = (label, name, type = "text", options = []) => (
     <div className="form-group" key={name}>
       <label>{label}</label>
-      {type === 'select' ? (
+      {type === "select" ? (
         <select name={name} value={formData[name]} onChange={handleChange}>
-          {options.map(opt => (
-            <option key={opt} value={opt}>{opt}</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
           ))}
         </select>
-      ) : type === 'checkbox' ? (
-        <input type="checkbox" name={name} checked={formData[name]} onChange={handleChange} />
-      ) : type === 'file' ? (
+      ) : type === "checkbox" ? (
+        <input
+          type="checkbox"
+          name={name}
+          checked={formData[name]}
+          onChange={handleChange}
+        />
+      ) : type === "file" ? (
         <input type="file" name={name} onChange={handleChange} />
       ) : (
-        <input type={type} name={name} value={formData[name]} onChange={handleChange} />
+        <input
+          type={type}
+          name={name}
+          value={formData[name]}
+          onChange={handleChange}
+        />
       )}
     </div>
   );
@@ -163,7 +218,19 @@ const handleSubmit = (e) => {
             {renderInput("Gender", "gender", "select", ["Male", "Female"])}
             {renderInput("Date of Birth", "dateOfBirth", "date")}
             {renderInput("Place of Birth", "placeOfBirth")}
-            {renderInput("Nationality", "nationality", "select", ["Kenyan", "Ugandan", "Tanzanian", "Rwandese", "Burundian", "South Sudanese", "Somali", "Congolese", "Ethiopian", "Eritrean", "Other"])}
+            {renderInput("Nationality", "nationality", "select", [
+              "Kenyan",
+              "Ugandan",
+              "Tanzanian",
+              "Rwandese",
+              "Burundian",
+              "South Sudanese",
+              "Somali",
+              "Congolese",
+              "Ethiopian",
+              "Eritrean",
+              "Other",
+            ])}
           </div>
 
           <div className="section">
@@ -174,7 +241,12 @@ const handleSubmit = (e) => {
             {renderInput("Mother Phone", "motherPhone")}
             {renderInput("Guardian Name", "guardianName")}
             {renderInput("Guardian Phone", "guardianPhone")}
-            {renderInput("Relationship to Student", "relationshipToStudent", "select", ["Brother", "Sister", "Uncle", "Grandpa", "Grandmum", "Aunty"])}
+            {renderInput(
+              "Relationship to Student",
+              "relationshipToStudent",
+              "select",
+              ["Brother", "Sister", "Uncle", "Grandpa", "Grandmum", "Aunty"]
+            )}
             {renderInput("Parent Email", "parentEmail", "email")}
             {renderInput("Parent Address", "parentAddress")}
           </div>
@@ -204,7 +276,16 @@ const handleSubmit = (e) => {
           <div className="section">
             <h3>Health Info</h3>
             {renderInput("Medical Conditions", "medicalConditions")}
-            {renderInput("Blood Group", "bloodGroup", "select", ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])}
+            {renderInput("Blood Group", "bloodGroup", "select", [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-",
+            ])}
             {renderInput("Emergency Contact Name", "emergencyContactName")}
             {renderInput("Emergency Phone", "emergencyContactPhone")}
             {renderInput("Emergency Relation", "emergencyContactRelation")}
@@ -212,7 +293,12 @@ const handleSubmit = (e) => {
 
           <div className="section">
             <h3>Other Info</h3>
-            {renderInput("Religion", "religion", "select", ["Christian", "Muslim", "Hindu", "Other"])}
+            {renderInput("Religion", "religion", "select", [
+              "Christian",
+              "Muslim",
+              "Hindu",
+              "Other",
+            ])}
             {renderInput("Disability Status", "disabilityStatus", "checkbox")}
             {renderInput("Disability Description", "disabilityDescription")}
             {renderInput("Passport Photo", "passportPhoto", "file")}
@@ -223,7 +309,9 @@ const handleSubmit = (e) => {
 
         <div className="form-actions">
           <button type="submit">Submit</button>
-          <button type="button" onClick={handleReset}>Reset</button>
+          <button type="button" onClick={handleReset}>
+            Reset
+          </button>
         </div>
 
         {message && <p className="message">{message}</p>}

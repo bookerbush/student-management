@@ -1,7 +1,11 @@
+// File: StudentList.js
+
 import React, { useEffect, useState } from "react";
 import "./StudentList.css";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+//import { apiGet } from "../api";   // ✅ centralized API
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
@@ -12,16 +16,21 @@ const StudentList = () => {
     classEnrolled: "",
   });
 
+  // ✅ fetch via api.js
   useEffect(() => {
-    fetch("http://localhost:8080/students")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchStudents = async () => {
+      try {
+        const data = await apiGet("/students");
         setStudents(data);
         setFilteredStudents(data);
-      })
-      .catch((err) => console.error("Error fetching students:", err));
+      } catch (err) {
+        console.error("❌ Error fetching students:", err);
+      }
+    };
+    fetchStudents();
   }, []);
 
+  // ✅ apply filters locally
   useEffect(() => {
     let result = students;
 
@@ -107,7 +116,7 @@ const StudentList = () => {
           onChange={handleFilterChange}
         >
           <option value="">All Classes</option>
-          {[...new Set(students.map((s) => s.classEnrolled))].map((cls) => (
+          {[...new Set(students.map((s) => s.classEnrolled).filter(Boolean))].map((cls) => (
             <option key={cls} value={cls}>
               {cls}
             </option>
@@ -138,7 +147,7 @@ const StudentList = () => {
           {filteredStudents.length > 0 ? (
             filteredStudents.map((s, index) => (
               <tr
-                key={s.id}
+                key={s.id || s.admissionNumber}
                 className={index % 2 === 0 ? "even-row" : "odd-row"}
               >
                 <td>{s.admissionNumber}</td>

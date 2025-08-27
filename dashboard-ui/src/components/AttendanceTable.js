@@ -1,6 +1,8 @@
 // File: AttendanceTable.js
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+//import api from "../api";  // ✅ use shared API instance
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import './AttendanceTable.css';
 
 export const AttendanceTable = ({ selectedDate }) => {
@@ -10,12 +12,12 @@ export const AttendanceTable = ({ selectedDate }) => {
     if (!selectedDate) return;
 
     const dateStr = selectedDate.toISOString().split("T")[0];
-    axios.get(`http://localhost:8080/api/attendance/by-date/${dateStr}`)
+    apiGet(`/api/attendance/by-date/${dateStr}`)
       .then(res => {
         setAttendanceData(res.data || []);
       })
       .catch(err => {
-        console.error("Failed to fetch attendance for", dateStr, err);
+        console.error("❌ Failed to fetch attendance for", dateStr, err);
         setAttendanceData([]);
       });
   }, [selectedDate]);
@@ -57,7 +59,15 @@ export const AttendanceTable = ({ selectedDate }) => {
                     <td>{row.stream}</td>
                     <td>{row.studentId}</td>
                     <td>{row.student}</td>
-                    <td className={status === 'P' ? 'status-present' : status === 'A' ? 'status-absent' : ''}>
+                    <td
+                      className={
+                        status === 'P'
+                          ? 'status-present'
+                          : status === 'A'
+                          ? 'status-absent'
+                          : ''
+                      }
+                    >
                       {status}
                     </td>
                   </tr>

@@ -1,5 +1,8 @@
 // File: LoginForm.js
 import React, { useState } from "react";
+//import api from "../api";  // ✅ centralized axios instance
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import "./LoginForm.css";
 
 function LoginForm({ onLoginSuccess }) {
@@ -9,17 +12,13 @@ function LoginForm({ onLoginSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
 
     try {
-      const res = await fetch("http://localhost:8080/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      // ✅ use centralized api.js instance (no hardcoded URL)
+      const { data } = await apiPost("/api/login", { username, password });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (data?.success) {
         onLoginSuccess({
           role: data.role,
           admissionNo: data.admissionNo,
@@ -27,11 +26,15 @@ function LoginForm({ onLoginSuccess }) {
           username: data.username,
         });
       } else {
-        setErrorMessage(data.message || "Login failed.");
+        setErrorMessage(data?.message || "Login failed.");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setErrorMessage("Network or server error.");
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Network or server error.";
+      setErrorMessage(msg);
     }
   };
 

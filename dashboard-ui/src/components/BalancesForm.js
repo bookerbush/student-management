@@ -1,4 +1,8 @@
+// File: BalancesForm.js
 import React, { useState } from "react";
+//import api from "../api"; // ✅ use centralized API
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import "./BalancesForm.css";
 
 const BalancesForm = () => {
@@ -8,7 +12,7 @@ const BalancesForm = () => {
   const [balances, setBalances] = useState([]);
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalBalance, setTotalBalance] = useState(0);
-  const [loadingSMS, setLoadingSMS] = useState(false); // NEW
+  const [loadingSMS, setLoadingSMS] = useState(false);
 
   const fetchBalances = () => {
     if (!studyYear || !studyTerm || studyYear.includes("--") || studyTerm.includes("--")) {
@@ -16,14 +20,14 @@ const BalancesForm = () => {
       return;
     }
 
-    let url = `http://localhost:8080/api/balances/${studyYear}/${studyTerm}`;
+    let url = `/api/balances/${studyYear}/${studyTerm}`;
     if (admissionNumber.trim()) {
       url += `?admissionNumber=${admissionNumber.trim()}`;
     }
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
+    apiGet(url)
+      .then((res) => {
+        let data = res.data || [];
         let grouped = [];
 
         if (admissionNumber.trim()) {
@@ -56,12 +60,13 @@ const BalancesForm = () => {
 
         const totalAmt = grouped.reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
         const totalBal = grouped.reduce((sum, r) => sum + parseFloat(r.balance || 0), 0);
+
         setTotalPaid(totalAmt);
         setTotalBalance(totalBal);
         setBalances(grouped);
       })
       .catch((err) => {
-        console.error("Failed to fetch balances:", err);
+        console.error("❌ Failed to fetch balances:", err);
         alert("Could not fetch balances");
       });
   };
@@ -88,15 +93,12 @@ const BalancesForm = () => {
 
     setLoadingSMS(true);
 
-    fetch(`http://localhost:8080/api/balances/send-sms/${studyYear}/${studyTerm}`, {
-      method: "POST",
-    })
-      .then((res) => res.text())
-      .then((message) => {
-        alert(message || "SMS sent successfully.");
+    apiPost(`/api/balances/send-sms/${studyYear}/${studyTerm}`)
+      .then((res) => {
+        alert(res.data || "SMS sent successfully.");
       })
       .catch((err) => {
-        console.error("SMS Error:", err);
+        console.error("❌ SMS Error:", err);
         alert("Failed to send SMS.");
       })
       .finally(() => setLoadingSMS(false));
@@ -121,9 +123,9 @@ const BalancesForm = () => {
             transform="rotate(-90) translate(-32)" />
         </svg>
         <div className="chart-labels">
-          <div><span className="square yellow" /> Total Expected: { (totalPaid + totalBalance).toFixed(2) }</div>
-          <div><span className="square red" /> Total Balance: { totalBalance.toFixed(2) }</div>
-          <div><span className="square blue" /> Total Paid: { totalPaid.toFixed(2) }</div>
+          <div><span className="square yellow" /> Total Expected: {(totalPaid + totalBalance).toFixed(2)}</div>
+          <div><span className="square red" /> Total Balance: {totalBalance.toFixed(2)}</div>
+          <div><span className="square blue" /> Total Paid: {totalPaid.toFixed(2)}</div>
         </div>
       </div>
     );

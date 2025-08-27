@@ -1,4 +1,8 @@
+// File: ParentMessagesView.js
 import React, { useEffect, useState } from "react";
+//import { apiGet } from "../api";  // ✅ use centralized API utility
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import "./ParentMessagesView.css";
 
 function ParentMessagesView({ admissionNo }) {
@@ -15,18 +19,11 @@ function ParentMessagesView({ admissionNo }) {
 
     const fetchMessages = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/messages/parent/${admissionNo}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch messages");
-        }
-
-        const data = await response.json();
+        // ✅ now uses api.js, no hardcoded localhost URL
+        const data = await apiGet(`/messages/parent/${admissionNo}`);
         setMessages(data);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "Failed to fetch messages");
       } finally {
         setLoading(false);
       }

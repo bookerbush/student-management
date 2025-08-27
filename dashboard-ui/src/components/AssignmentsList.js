@@ -1,5 +1,8 @@
 // components/AssignmentsList.js
 import React, { useEffect, useState } from "react";
+//import api from "../api";  // ✅ use central api.js
+import { apiGet, apiPost, apiPut, apiDelete } from "../api";
+
 import "./AssignmentsList.css";
 
 export const AssignmentsList = () => {
@@ -14,16 +17,15 @@ export const AssignmentsList = () => {
   const [showMissing, setShowMissing] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/assignments")
-      .then((res) => res.json())
-      .then((data) => {
-        const sorted = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    apiGet("/api/assignments")
+      .then((res) => {
+        const sorted = res.data.sort((a, b) => new Date(b.date) - new Date(a.date));
         setAssignments(sorted);
         setFilteredAssignments(sorted);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Error fetching assignments:", err);
+        console.error("❌ Error fetching assignments:", err);
         setLoading(false);
       });
   }, []);
@@ -50,10 +52,9 @@ export const AssignmentsList = () => {
   }, [selectedClass, selectedStream, selectedDate, assignments]);
 
   const handleDownload = (id) => {
-    fetch(`http://localhost:8080/api/assignments/download/${id}`)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
+    apiGet(`/api/assignments/download/${id}`, { responseType: "blob" })
+      .then((res) => {
+        const url = window.URL.createObjectURL(res.data);
         const a = document.createElement("a");
         a.href = url;
         a.download = `assignment_${id}.doc`;
@@ -62,18 +63,18 @@ export const AssignmentsList = () => {
         a.remove();
         window.URL.revokeObjectURL(url);
       })
-      .catch((err) => console.error("Error downloading file:", err));
+      .catch((err) => console.error("❌ Error downloading file:", err));
   };
 
   const checkMissingAssignments = () => {
     if (!selectedDate) {
-      alert("Please select a date to check missing assignments.");
+      alert("⚠️ Please select a date to check missing assignments.");
       return;
     }
 
-    fetch("http://localhost:8080/api/streams")
-      .then((res) => res.json())
-      .then((allStreams) => {
+    apiGet("/api/streams")
+      .then((res) => {
+        const allStreams = res.data;
         const missingList = [];
 
         allStreams.forEach((stream) => {
@@ -101,7 +102,7 @@ export const AssignmentsList = () => {
         setFilteredAssignments(missingList);
         setShowMissing(true);
       })
-      .catch((err) => console.error("Error fetching streams list:", err));
+      .catch((err) => console.error("❌ Error fetching streams list:", err));
   };
 
   if (loading) {

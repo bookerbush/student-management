@@ -1,29 +1,32 @@
+// File: DashboardAttendance.js
 import React, { useEffect, useState } from 'react';
 import './DashboardAttendance.css';
 import axios from 'axios';
+import { API_BASE_URL } from "../config"; // ✅ correct
 
 const DashboardAttendance = ({ selectedDate }) => {
   const [records, setRecords] = useState([]);
   const [currentDate, setCurrentDate] = useState('');
 
   const formatDate = (dateObj) => {
-  if (!dateObj) return '';
-  const kenyaTime = new Date(dateObj.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-  const yyyy = kenyaTime.getFullYear();
-  const mm = String(kenyaTime.getMonth() + 1).padStart(2, '0');
-  const dd = String(kenyaTime.getDate()).padStart(2, '0');
-  const formatted = `${yyyy}-${mm}-${dd}`;
-  console.log('📅 Formatted date (Kenya time):', formatted);
-  return formatted;
-};
-
+    if (!dateObj) return '';
+    const kenyaTime = new Date(
+      dateObj.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' })
+    );
+    const yyyy = kenyaTime.getFullYear();
+    const mm = String(kenyaTime.getMonth() + 1).padStart(2, '0');
+    const dd = String(kenyaTime.getDate()).padStart(2, '0');
+    const formatted = `${yyyy}-${mm}-${dd}`;
+    console.log('📅 Formatted date (Kenya time):', formatted);
+    return formatted;
+  };
 
   const fetchAttendance = async (targetDate) => {
     const formattedDate = formatDate(targetDate);
     console.log('📡 Fetching attendance for date:', formattedDate);
 
     try {
-      const res = await axios.get('http://localhost:8080/api/tracking/dashboard/attendance', {
+      const res = await axios.get(`${API_BASE_URL}/tracking/dashboard/attendance`, {
         params: { date: formattedDate }
       });
       console.log('✅ API response:', res.data);
@@ -31,6 +34,7 @@ const DashboardAttendance = ({ selectedDate }) => {
       setCurrentDate(formattedDate);
     } catch (err) {
       console.error('❌ Failed to load attendance data', err);
+      setRecords([]);
     }
   };
 
@@ -41,7 +45,7 @@ const DashboardAttendance = ({ selectedDate }) => {
       wedDate: 'wedStatus',
       thursDate: 'thursStatus',
       friDate: 'friStatus',
-      satDate: 'satStatus'
+      satDate: 'satStatus',
     };
 
     for (let dateKey in dateMap) {
@@ -56,9 +60,6 @@ const DashboardAttendance = ({ selectedDate }) => {
 
   useEffect(() => {
     const dateToUse = selectedDate || new Date();
-    const formatted = formatDate(dateToUse);
-
-    // Always allow fetching if a user manually selected a date (even on Sunday)
     fetchAttendance(dateToUse);
 
     const interval = setInterval(() => {
@@ -94,7 +95,9 @@ const DashboardAttendance = ({ selectedDate }) => {
                     <td>{r.stream}</td>
                     <td>{r.studentId}</td>
                     <td>{r.student}</td>
-                    <td className={status === 'P' ? 'yellow-bg' : 'red-bg'}>{status}</td>
+                    <td className={status === 'P' ? 'yellow-bg' : 'red-bg'}>
+                      {status}
+                    </td>
                   </tr>
                 );
               })

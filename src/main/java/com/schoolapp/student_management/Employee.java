@@ -19,8 +19,8 @@ public class Employee {
     private String nextofkinNo;
 
     @Lob
-    @Column(name = "photo", columnDefinition = "LONGBLOB")
-    private byte[] photo; // ✅ changed from String to byte[]
+    @Column(name = "photo") // ✅ removed MySQL-specific columnDefinition
+    private byte[] photo;
 
     private double salary;
     private String krapin;
@@ -47,7 +47,7 @@ public class Employee {
     public String getNextofkinNo() { return nextofkinNo; }
     public void setNextofkinNo(String nextofkinNo) { this.nextofkinNo = nextofkinNo; }
 
-    public byte[] getPhoto() { return photo; } // ✅ updated
+    public byte[] getPhoto() { return photo; }
     public void setPhoto(byte[] photo) { this.photo = photo; }
 
     public double getSalary() { return salary; }
