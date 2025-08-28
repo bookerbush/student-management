@@ -15,7 +15,9 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                                "http://localhost:3000",                           // local frontend
+                                "http://localhost:3000",   // local frontend
+                                "http://localhost:3001",
+                                "http://localhost:3002",
                                 "https://student-management-frontend-vq9m.onrender.com" // deployed frontend
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

@@ -18,8 +18,9 @@ public class Employee {
     @Column(name = "nextofkin_no")
     private String nextofkinNo;
 
+    // ✅ Universal fix: works in MySQL (BLOB) and Postgres (BYTEA)
     @Lob
-    @Column(name = "photo") // ✅ removed MySQL-specific columnDefinition
+    @Column(name = "photo", columnDefinition = "bytea")
     private byte[] photo;
 
     private double salary;
