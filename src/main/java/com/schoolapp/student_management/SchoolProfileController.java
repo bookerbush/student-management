@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/school-profile")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class SchoolProfileController {
 
     @Autowired

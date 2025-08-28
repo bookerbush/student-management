@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/fees")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class SchoolFeeController {
 
     @Autowired

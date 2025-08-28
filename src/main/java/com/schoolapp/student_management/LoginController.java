@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/login")
-@CrossOrigin(origins = "*")  // You can restrict this later as needed
+//@CrossOrigin(origins = "*")  // You can restrict this later as needed
 public class LoginController {
 
     @Autowired

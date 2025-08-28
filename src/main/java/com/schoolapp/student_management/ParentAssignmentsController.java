@@ -9,7 +9,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/parent/assignments")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class ParentAssignmentsController {
 
     @Autowired

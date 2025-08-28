@@ -8,7 +8,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class PaymentDataController {
 
     @Autowired

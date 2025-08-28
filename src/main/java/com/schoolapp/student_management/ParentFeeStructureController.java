@@ -6,7 +6,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/parentdata")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class ParentFeeStructureController {
 
     @Autowired

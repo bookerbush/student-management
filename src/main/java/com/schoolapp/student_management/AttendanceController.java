@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/parentdata/attendance")
-@CrossOrigin
+//@CrossOrigin
 public class AttendanceController {
 
     @Autowired

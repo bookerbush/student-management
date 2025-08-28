@@ -6,7 +6,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/parent/assessments")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class ParentAssessmentController {
 
     @Autowired

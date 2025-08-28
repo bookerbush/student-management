@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/balances")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class BalancesController {
 
     @Autowired

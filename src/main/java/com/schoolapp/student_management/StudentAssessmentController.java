@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/student/assessments")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class StudentAssessmentController {
 
     private static final Logger log = LoggerFactory.getLogger(StudentAssessmentController.class);

@@ -7,7 +7,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/portal")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class PortalController {
 
     @Autowired

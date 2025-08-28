@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/login-content")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class LoginPageContentController {
 
     @Autowired

@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/messages")
-@CrossOrigin(origins = "*") // For quick testing; later restrict to your frontend URL
+//@CrossOrigin(origins = "*") // For quick testing; later restrict to your frontend URL
 public class MessageController {
 
     private final MessageService service;
