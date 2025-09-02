@@ -19,7 +19,7 @@ public class WebConfig {
                                 "http://localhost:3001",
                                 "http://localhost:3002",
                                 "https://student-management-frontend-vq9m.onrender.com"
-                        )
+                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

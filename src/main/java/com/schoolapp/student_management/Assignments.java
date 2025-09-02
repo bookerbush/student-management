@@ -16,7 +16,7 @@ public class Assignments {
     private String subject;
 
     @Lob
-    @Column(name = "worktodo") // ✅ removed MySQL-specific columnDefinition
+    @Column(name = "worktodo", columnDefinition = "bytea") // ✅ force Postgres to use bytea
     private byte[] worktodo;
 
     @Temporal(TemporalType.DATE)
