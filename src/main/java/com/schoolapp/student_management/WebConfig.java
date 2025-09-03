@@ -15,11 +15,11 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOriginPatterns(
-                                "http://localhost:3000",
+                                "http://localhost:3000",   // local frontend
                                 "http://localhost:3001",
                                 "http://localhost:3002",
-                                "https://student-management-frontend-vq9m.onrender.com"
-                         )
+                                "https://student-management-frontend-vq9m.onrender.com" // ✅ frontend on Render
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
