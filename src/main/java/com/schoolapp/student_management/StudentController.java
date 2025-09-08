@@ -29,49 +29,77 @@ public class StudentController {
         return studentService.saveStudent(student);
     }
 
+    /**
+     * Upload endpoint expects multipart/form-data with:
+     * - studentData: JSON string for the Student object
+     * - passportPhoto: optional MultipartFile
+     */
     @PostMapping(value = "/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> uploadStudent(
             @RequestPart("studentData") String studentJson,
             @RequestPart(value = "passportPhoto", required = false) MultipartFile passportPhoto) {
         try {
-            // ✅ Debug logs
+            // Debug logs
             System.out.println("---- Incoming Student Upload ----");
             System.out.println("Raw studentData JSON: " + studentJson);
-            if (passportPhoto != null) {
-                System.out.println("Received file: " + passportPhoto.getOriginalFilename() +
-                                   " (size: " + passportPhoto.getSize() + " bytes)");
-            } else {
-                System.out.println("No passportPhoto uploaded.");
-            }
 
             ObjectMapper objectMapper = new ObjectMapper();
             Student student = objectMapper.readValue(studentJson, Student.class);
 
-            System.out.println("Mapped Student object: " + student);
-
-            if (passportPhoto != null && !passportPhoto.isEmpty()) {
-                String fileName = UUID.randomUUID() + "_" + passportPhoto.getOriginalFilename();
-                Path path = Paths.get("uploads", fileName);
-                Files.copy(passportPhoto.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                student.setPassportPhoto(fileName);
-                System.out.println("Saved passport photo as: " + fileName);
+            // Pretty-print mapped student
+            try {
+                String pretty = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(student);
+                System.out.println("Mapped Student object (pretty):\n" + pretty);
+            } catch (Exception ignore) {
+                System.out.println("Mapped Student object: " + student);
             }
 
-            studentService.saveStudent(student);
+            if (passportPhoto != null && !passportPhoto.isEmpty()) {
+                String original = passportPhoto.getOriginalFilename();
+                // sanitize original name to avoid filesystem trouble (spaces, parentheses, etc.)
+                String safeOriginal = (original == null) ? "photo" :
+                        original.replaceAll("[^a-zA-Z0-9._-]", "_");
 
-            // ✅ Save linked users
-            createStudentAndParentUsers(student);
+                String fileName = UUID.randomUUID().toString() + "_" + safeOriginal;
 
-            System.out.println("Student saved successfully with ID: " + student.getId());
+                Path uploadDir = Paths.get("uploads");
+                // create directory if it doesn't exist
+                if (!Files.exists(uploadDir)) {
+                    Files.createDirectories(uploadDir);
+                    System.out.println("Created upload directory: " + uploadDir.toAbsolutePath());
+                }
+
+                Path path = uploadDir.resolve(fileName);
+                Files.copy(passportPhoto.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+                // store only the file name (varchar field in DB)
+                student.setPassportPhoto(fileName);
+                System.out.println("Saved passport photo as: " + path.toAbsolutePath());
+            } else {
+                System.out.println("No passportPhoto uploaded.");
+            }
+
+            // Save student and linked users
+            Student saved = studentService.saveStudent(student);
+            createStudentAndParentUsers(saved);
+
+            System.out.println("Student saved successfully with ID: " + saved.getId());
             System.out.println("---- Upload Complete ----");
 
-            return ResponseEntity.ok("✅ Student saved successfully!");
+            // Return a structured JSON response
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("message", "Student saved successfully");
+            resp.put("id", saved.getId());
+            resp.put("student", saved);
+            return ResponseEntity.ok(resp);
 
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("❌ Error while saving student: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("❌ Failed to save student: " + e.getMessage());
+            Map<String, Object> err = new HashMap<>();
+            err.put("error", "Failed to save student");
+            err.put("details", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
     }
 
