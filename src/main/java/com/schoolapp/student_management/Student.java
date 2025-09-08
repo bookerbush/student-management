@@ -8,7 +8,7 @@ import java.util.Date;
 public class Student {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // ✅ works for both MySQL & Postgres
     private Long id;
 
     // Basic Info
@@ -17,13 +17,19 @@ public class Student {
     private String middleName;
     private String lastName;
     private String gender;
+
+    @Temporal(TemporalType.DATE) // ✅ safer mapping for date only
     private Date dateOfBirth;
+
     private String placeOfBirth;
     private String nationality;
 
     // Enrollment
     private String admissionNumber;
+
+    @Temporal(TemporalType.DATE)
     private Date dateOfAdmission;
+
     private String classEnrolled;
     private String stream;
     private String admissionType;
@@ -50,6 +56,7 @@ public class Student {
     // Health & Emergency
     @Column(columnDefinition = "TEXT")
     private String medicalConditions;
+
     private String bloodGroup;
     private String emergencyContactName;
     private String emergencyContactPhone;
@@ -63,6 +70,7 @@ public class Student {
     private String disabilityDescription;
 
     private String passportPhoto;
+
     @Column(columnDefinition = "TEXT")
     private String remarks;
 
@@ -77,12 +85,13 @@ public class Student {
     // Constructors
     public Student() {}
 
-    // Getters and Setters for all fields
+    // =============================
+    // Getters and Setters
+    // =============================
 
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -90,7 +99,6 @@ public class Student {
     public String getStudentId() {
         return studentId;
     }
-
     public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
@@ -98,7 +106,6 @@ public class Student {
     public String getFirstName() {
         return firstName;
     }
-
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -106,7 +113,6 @@ public class Student {
     public String getMiddleName() {
         return middleName;
     }
-
     public void setMiddleName(String middleName) {
         this.middleName = middleName;
     }
@@ -114,7 +120,6 @@ public class Student {
     public String getLastName() {
         return lastName;
     }
-
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
@@ -122,7 +127,6 @@ public class Student {
     public String getGender() {
         return gender;
     }
-
     public void setGender(String gender) {
         this.gender = gender;
     }
@@ -130,7 +134,6 @@ public class Student {
     public Date getDateOfBirth() {
         return dateOfBirth;
     }
-
     public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
@@ -138,7 +141,6 @@ public class Student {
     public String getPlaceOfBirth() {
         return placeOfBirth;
     }
-
     public void setPlaceOfBirth(String placeOfBirth) {
         this.placeOfBirth = placeOfBirth;
     }
@@ -146,7 +148,6 @@ public class Student {
     public String getNationality() {
         return nationality;
     }
-
     public void setNationality(String nationality) {
         this.nationality = nationality;
     }
@@ -154,7 +155,6 @@ public class Student {
     public String getAdmissionNumber() {
         return admissionNumber;
     }
-
     public void setAdmissionNumber(String admissionNumber) {
         this.admissionNumber = admissionNumber;
     }
@@ -162,7 +162,6 @@ public class Student {
     public Date getDateOfAdmission() {
         return dateOfAdmission;
     }
-
     public void setDateOfAdmission(Date dateOfAdmission) {
         this.dateOfAdmission = dateOfAdmission;
     }
@@ -170,7 +169,6 @@ public class Student {
     public String getClassEnrolled() {
         return classEnrolled;
     }
-
     public void setClassEnrolled(String classEnrolled) {
         this.classEnrolled = classEnrolled;
     }
@@ -178,7 +176,6 @@ public class Student {
     public String getStream() {
         return stream;
     }
-
     public void setStream(String stream) {
         this.stream = stream;
     }
@@ -186,7 +183,6 @@ public class Student {
     public String getAdmissionType() {
         return admissionType;
     }
-
     public void setAdmissionType(String admissionType) {
         this.admissionType = admissionType;
     }
@@ -194,7 +190,6 @@ public class Student {
     public String getStudentType() {
         return studentType;
     }
-
     public void setStudentType(String studentType) {
         this.studentType = studentType;
     }
@@ -202,7 +197,6 @@ public class Student {
     public String getFatherName() {
         return fatherName;
     }
-
     public void setFatherName(String fatherName) {
         this.fatherName = fatherName;
     }
@@ -210,7 +204,6 @@ public class Student {
     public String getFatherPhone() {
         return fatherPhone;
     }
-
     public void setFatherPhone(String fatherPhone) {
         this.fatherPhone = fatherPhone;
     }
@@ -218,7 +211,6 @@ public class Student {
     public String getMotherName() {
         return motherName;
     }
-
     public void setMotherName(String motherName) {
         this.motherName = motherName;
     }
@@ -226,7 +218,6 @@ public class Student {
     public String getMotherPhone() {
         return motherPhone;
     }
-
     public void setMotherPhone(String motherPhone) {
         this.motherPhone = motherPhone;
     }
@@ -234,7 +225,6 @@ public class Student {
     public String getGuardianName() {
         return guardianName;
     }
-
     public void setGuardianName(String guardianName) {
         this.guardianName = guardianName;
     }
@@ -242,7 +232,6 @@ public class Student {
     public String getGuardianPhone() {
         return guardianPhone;
     }
-
     public void setGuardianPhone(String guardianPhone) {
         this.guardianPhone = guardianPhone;
     }
@@ -250,7 +239,6 @@ public class Student {
     public String getRelationshipToStudent() {
         return relationshipToStudent;
     }
-
     public void setRelationshipToStudent(String relationshipToStudent) {
         this.relationshipToStudent = relationshipToStudent;
     }
@@ -258,7 +246,6 @@ public class Student {
     public String getParentEmail() {
         return parentEmail;
     }
-
     public void setParentEmail(String parentEmail) {
         this.parentEmail = parentEmail;
     }
@@ -266,7 +253,6 @@ public class Student {
     public String getParentAddress() {
         return parentAddress;
     }
-
     public void setParentAddress(String parentAddress) {
         this.parentAddress = parentAddress;
     }
@@ -274,7 +260,6 @@ public class Student {
     public Boolean getBoardingStatus() {
         return boardingStatus;
     }
-
     public void setBoardingStatus(Boolean boardingStatus) {
         this.boardingStatus = boardingStatus;
     }
@@ -282,7 +267,6 @@ public class Student {
     public String getDormitory() {
         return dormitory;
     }
-
     public void setDormitory(String dormitory) {
         this.dormitory = dormitory;
     }
@@ -290,7 +274,6 @@ public class Student {
     public String getHouseParent() {
         return houseParent;
     }
-
     public void setHouseParent(String houseParent) {
         this.houseParent = houseParent;
     }
@@ -298,7 +281,6 @@ public class Student {
     public String getMedicalConditions() {
         return medicalConditions;
     }
-
     public void setMedicalConditions(String medicalConditions) {
         this.medicalConditions = medicalConditions;
     }
@@ -306,7 +288,6 @@ public class Student {
     public String getBloodGroup() {
         return bloodGroup;
     }
-
     public void setBloodGroup(String bloodGroup) {
         this.bloodGroup = bloodGroup;
     }
@@ -314,7 +295,6 @@ public class Student {
     public String getEmergencyContactName() {
         return emergencyContactName;
     }
-
     public void setEmergencyContactName(String emergencyContactName) {
         this.emergencyContactName = emergencyContactName;
     }
@@ -322,7 +302,6 @@ public class Student {
     public String getEmergencyContactPhone() {
         return emergencyContactPhone;
     }
-
     public void setEmergencyContactPhone(String emergencyContactPhone) {
         this.emergencyContactPhone = emergencyContactPhone;
     }
@@ -330,7 +309,6 @@ public class Student {
     public String getEmergencyContactRelation() {
         return emergencyContactRelation;
     }
-
     public void setEmergencyContactRelation(String emergencyContactRelation) {
         this.emergencyContactRelation = emergencyContactRelation;
     }
@@ -338,7 +316,6 @@ public class Student {
     public String getReligion() {
         return religion;
     }
-
     public void setReligion(String religion) {
         this.religion = religion;
     }
@@ -346,7 +323,6 @@ public class Student {
     public Boolean getDisabilityStatus() {
         return disabilityStatus;
     }
-
     public void setDisabilityStatus(Boolean disabilityStatus) {
         this.disabilityStatus = disabilityStatus;
     }
@@ -354,7 +330,6 @@ public class Student {
     public String getDisabilityDescription() {
         return disabilityDescription;
     }
-
     public void setDisabilityDescription(String disabilityDescription) {
         this.disabilityDescription = disabilityDescription;
     }
@@ -362,7 +337,6 @@ public class Student {
     public String getPassportPhoto() {
         return passportPhoto;
     }
-
     public void setPassportPhoto(String passportPhoto) {
         this.passportPhoto = passportPhoto;
     }
@@ -370,7 +344,6 @@ public class Student {
     public String getRemarks() {
         return remarks;
     }
-
     public void setRemarks(String remarks) {
         this.remarks = remarks;
     }
@@ -378,7 +351,6 @@ public class Student {
     public String getStudentStatus() {
         return studentStatus;
     }
-
     public void setStudentStatus(String studentStatus) {
         this.studentStatus = studentStatus;
     }
@@ -386,7 +358,6 @@ public class Student {
     public Date getCreatedAt() {
         return createdAt;
     }
-
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
@@ -394,7 +365,6 @@ public class Student {
     public Date getUpdatedAt() {
         return updatedAt;
     }
-
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
