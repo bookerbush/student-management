@@ -29,30 +29,47 @@ public class StudentController {
         return studentService.saveStudent(student);
     }
 
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> uploadStudent(
-            @RequestParam(value = "passportPhoto", required = false) MultipartFile passportPhoto,
-            @RequestParam("studentData") String studentJson) {
+            @RequestPart("studentData") String studentJson,
+            @RequestPart(value = "passportPhoto", required = false) MultipartFile passportPhoto) {
         try {
+            // ✅ Debug logs
+            System.out.println("---- Incoming Student Upload ----");
+            System.out.println("Raw studentData JSON: " + studentJson);
+            if (passportPhoto != null) {
+                System.out.println("Received file: " + passportPhoto.getOriginalFilename() +
+                                   " (size: " + passportPhoto.getSize() + " bytes)");
+            } else {
+                System.out.println("No passportPhoto uploaded.");
+            }
+
             ObjectMapper objectMapper = new ObjectMapper();
             Student student = objectMapper.readValue(studentJson, Student.class);
+
+            System.out.println("Mapped Student object: " + student);
 
             if (passportPhoto != null && !passportPhoto.isEmpty()) {
                 String fileName = UUID.randomUUID() + "_" + passportPhoto.getOriginalFilename();
                 Path path = Paths.get("uploads", fileName);
                 Files.copy(passportPhoto.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
                 student.setPassportPhoto(fileName);
+                System.out.println("Saved passport photo as: " + fileName);
             }
 
             studentService.saveStudent(student);
 
-            // ✅ Save users
+            // ✅ Save linked users
             createStudentAndParentUsers(student);
 
-            return ResponseEntity.ok("Student saved successfully");
+            System.out.println("Student saved successfully with ID: " + student.getId());
+            System.out.println("---- Upload Complete ----");
+
+            return ResponseEntity.ok("✅ Student saved successfully!");
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.err.println("❌ Error while saving student: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("❌ Failed to save student: " + e.getMessage());
         }
@@ -84,6 +101,9 @@ public class StudentController {
             user.setEmployeeId(employeeId);
             user.setStatus("ACTIVE");
             userRepository.save(user);
+            System.out.println("Created new user: " + username + " with role " + role);
+        } else {
+            System.out.println("User already exists: " + username);
         }
     }
 
