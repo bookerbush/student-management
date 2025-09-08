@@ -18,10 +18,10 @@ public class WebConfig {
                                 "http://localhost:3000",   // local frontend
                                 "http://localhost:3001",
                                 "http://localhost:3002",
-                                "https://student-management-frontend-vq9m.onrender.com" // ✅ frontend on Render
+                                "https://student-management-frontend-vq9m.onrender.com" // Render frontend
                         )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
+                        .allowedMethods("*") // allow all methods
+                        .allowedHeaders("*") // allow all headers
                         .allowCredentials(true);
             }
         };
