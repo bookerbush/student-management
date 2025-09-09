@@ -3,17 +3,29 @@ package com.schoolapp.student_management;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "school_fee") // Ensure Hibernate maps to correct table name
 public class SchoolFee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "item_description")
     private String itemDescription;
-    private Double pp0Fee;      // for "PP0" column in frontend
-    private Double pp12Fee;     // for "PP1-PP2" column in frontend
-    private Double grade13Fee;
-    private Double grade46Fee;
+
+    @Column(name = "pp0fee")
+    private Double pp0Fee;   // maps to column "pp0fee"
+
+    @Column(name = "pp12fee")
+    private Double pp12Fee;  // maps to column "pp12fee"
+
+    @Column(name = "grade13fee")
+    private Double grade13Fee; // maps to column "grade13fee"
+
+    @Column(name = "grade46fee")
+    private Double grade46Fee; // maps to column "grade46fee"
+
+    @Column(name = "remarks")
     private String remarks;
 
     // Getters and Setters
