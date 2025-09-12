@@ -1,6 +1,8 @@
 package com.schoolapp.student_management;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,9 +29,9 @@ public class EmployeeController {
         return employeeService.getEmployeeById(id);
     }
 
-    // ✅ FIXED: Accept multipart/form-data correctly
+    // ✅ FIXED: Proper error handling + clear logs
     @PostMapping(consumes = {"multipart/form-data"})
-    public Employee createEmployee(
+    public ResponseEntity<?> createEmployee(
             @RequestParam("fullname") String fullname,
             @RequestParam("role") String role,
             @RequestParam("nationalid") String nationalid,
@@ -39,41 +41,69 @@ public class EmployeeController {
             @RequestParam("krapin") String krapin,
             @RequestParam("sha") String sha,
             @RequestParam("telephone") String telephone,
-             @RequestParam("nssfno") String nssfno,  // ✅ Add this line
+            @RequestParam("nssfno") String nssfno,
             @RequestParam(value = "photo", required = false) MultipartFile photo
-    ) throws IOException {
-        Employee employee = new Employee();
-        employee.setEmployeeId(UUID.randomUUID().toString());
-        employee.setFullname(fullname);
-        employee.setRole(role);
-        employee.setNationalid(nationalid);
-        employee.setNextofkin(nextofkin);
-        employee.setNextofkinNo(nextofkinno);
-        employee.setSalary(salary);
-        employee.setKrapin(krapin);
-        employee.setSha(sha);
-        employee.setTelephone(telephone);
-        employee.setNssfno(nssfno);  // ✅ Set here too
+    ) {
+        try {
+            Employee employee = new Employee();
+            employee.setEmployeeId(UUID.randomUUID().toString());
+            employee.setFullname(fullname);
+            employee.setRole(role);
+            employee.setNationalid(nationalid);
+            employee.setNextofkin(nextofkin);
+            employee.setNextofkinNo(nextofkinno);
+            employee.setSalary(salary);
+            employee.setKrapin(krapin);
+            employee.setSha(sha);
+            employee.setTelephone(telephone);
+            employee.setNssfno(nssfno);
 
-        if (photo != null && !photo.isEmpty()) {
-            employee.setPhoto(photo.getBytes());
+            if (photo != null && !photo.isEmpty()) {
+                employee.setPhoto(photo.getBytes());
+            }
+
+            Employee saved = employeeService.saveEmployee(employee);
+            return ResponseEntity.ok(saved);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // Logs full stacktrace in server logs
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ Error saving employee: " + e.getMessage());
         }
-
-        return employeeService.saveEmployee(employee);
     }
 
     @PutMapping("/{id}")
-    public Employee updateEmployee(@PathVariable String id, @ModelAttribute Employee updatedEmployee,
-                                   @RequestParam(value = "photo", required = false) MultipartFile photo) throws IOException {
-        updatedEmployee.setEmployeeId(id);
-        if (photo != null && !photo.isEmpty()) {
-            updatedEmployee.setPhoto(photo.getBytes());
+    public ResponseEntity<?> updateEmployee(
+            @PathVariable String id,
+            @ModelAttribute Employee updatedEmployee,
+            @RequestParam(value = "photo", required = false) MultipartFile photo
+    ) {
+        try {
+            updatedEmployee.setEmployeeId(id);
+            if (photo != null && !photo.isEmpty()) {
+                updatedEmployee.setPhoto(photo.getBytes());
+            }
+            Employee saved = employeeService.saveEmployee(updatedEmployee);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ Error updating employee: " + e.getMessage());
         }
-        return employeeService.saveEmployee(updatedEmployee);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteEmployee(@PathVariable String id) {
-        employeeService.deleteEmployee(id);
+    public ResponseEntity<?> deleteEmployee(@PathVariable String id) {
+        try {
+            employeeService.deleteEmployee(id);
+            return ResponseEntity.ok("✔ Employee deleted successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ Error deleting employee: " + e.getMessage());
+        }
     }
 }

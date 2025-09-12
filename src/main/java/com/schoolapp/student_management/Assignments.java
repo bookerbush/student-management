@@ -1,7 +1,7 @@
 package com.schoolapp.student_management;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.sql.Date; // ✅ use sql.Date, not util.Date
 
 @Entity
 @Table(name = "assignment")
@@ -19,8 +19,7 @@ public class Assignments {
     @Column(name = "worktodo", columnDefinition = "bytea") // ✅ force Postgres to use bytea
     private byte[] worktodo;
 
-    @Temporal(TemporalType.DATE)
-    private Date date;
+    private Date date; // ✅ now sql.Date, no need for @Temporal
 
     private String teacher;
 

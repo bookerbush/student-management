@@ -18,9 +18,9 @@ public class Employee {
     @Column(name = "nextofkin_no")
     private String nextofkinNo;
 
-    // ✅ Universal fix: works in MySQL (BLOB) and Postgres (BYTEA)
+    // ✅ FIXED: Let Hibernate decide (BLOB in MySQL, BYTEA in Postgres)
     @Lob
-    @Column(name = "photo", columnDefinition = "bytea")
+    @Column(name = "photo")
     private byte[] photo;
 
     private double salary;
@@ -30,39 +30,99 @@ public class Employee {
     private String nssfno;
 
     // Getters and Setters
-    public String getEmployeeId() { return employeeId; }
-    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+    public String getEmployeeId() {
+        return employeeId;
+    }
 
-    public String getFullname() { return fullname; }
-    public void setFullname(String fullname) { this.fullname = fullname; }
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public String getFullname() {
+        return fullname;
+    }
 
-    public String getNationalid() { return nationalid; }
-    public void setNationalid(String nationalid) { this.nationalid = nationalid; }
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
 
-    public String getNextofkin() { return nextofkin; }
-    public void setNextofkin(String nextofkin) { this.nextofkin = nextofkin; }
+    public String getRole() {
+        return role;
+    }
 
-    public String getNextofkinNo() { return nextofkinNo; }
-    public void setNextofkinNo(String nextofkinNo) { this.nextofkinNo = nextofkinNo; }
+    public void setRole(String role) {
+        this.role = role;
+    }
 
-    public byte[] getPhoto() { return photo; }
-    public void setPhoto(byte[] photo) { this.photo = photo; }
+    public String getNationalid() {
+        return nationalid;
+    }
 
-    public double getSalary() { return salary; }
-    public void setSalary(double salary) { this.salary = salary; }
+    public void setNationalid(String nationalid) {
+        this.nationalid = nationalid;
+    }
 
-    public String getKrapin() { return krapin; }
-    public void setKrapin(String krapin) { this.krapin = krapin; }
+    public String getNextofkin() {
+        return nextofkin;
+    }
 
-    public String getSha() { return sha; }
-    public void setSha(String sha) { this.sha = sha; }
+    public void setNextofkin(String nextofkin) {
+        this.nextofkin = nextofkin;
+    }
 
-    public String getTelephone() { return telephone; }
-    public void setTelephone(String telephone) { this.telephone = telephone; }
+    public String getNextofkinNo() {
+        return nextofkinNo;
+    }
 
-    public String getNssfno() { return nssfno; }
-    public void setNssfno(String nssfno) { this.nssfno = nssfno; }
+    public void setNextofkinNo(String nextofkinNo) {
+        this.nextofkinNo = nextofkinNo;
+    }
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+
+    public String getKrapin() {
+        return krapin;
+    }
+
+    public void setKrapin(String krapin) {
+        this.krapin = krapin;
+    }
+
+    public String getSha() {
+        return sha;
+    }
+
+    public void setSha(String sha) {
+        this.sha = sha;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public String getNssfno() {
+        return nssfno;
+    }
+
+    public void setNssfno(String nssfno) {
+        this.nssfno = nssfno;
+    }
 }

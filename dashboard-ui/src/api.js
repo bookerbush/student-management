@@ -1,8 +1,7 @@
 // src/api.js
 
 // ✅ Use env variable in production, fallback to localhost for local dev
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:8080";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 async function request(endpoint, options = {}) {
   // Ensure endpoint starts with "/"
@@ -18,7 +17,10 @@ async function request(endpoint, options = {}) {
 
   const config = {
     ...options,
-    headers: { ...defaultHeaders, ...options.headers },
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
   };
 
   try {
@@ -26,6 +28,7 @@ async function request(endpoint, options = {}) {
 
     let data;
     const contentType = response.headers.get("content-type");
+
     if (contentType && contentType.includes("application/json")) {
       data = await response.json();
     } else {
@@ -72,7 +75,10 @@ export function apiPut(endpoint, data, headers = {}) {
 }
 
 export function apiDelete(endpoint, headers = {}) {
-  return request(endpoint, { method: "DELETE", headers });
+  return request(endpoint, {
+    method: "DELETE",
+    headers,
+  });
 }
 
 export default { apiGet, apiPost, apiPut, apiDelete };
