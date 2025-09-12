@@ -16,10 +16,11 @@ public class Assignments {
     private String subject;
 
     @Lob
-    @Column(name = "worktodo", columnDefinition = "bytea") // ✅ force Postgres to use bytea
+    @Basic(fetch = FetchType.LAZY) // ✅ ensures large files load only when needed
+    @Column(name = "worktodo", nullable = false)
     private byte[] worktodo;
 
-    private Date date; // ✅ now sql.Date, no need for @Temporal
+    private Date date; // ✅ sql.Date maps correctly in both MySQL & Postgres
 
     private String teacher;
 
