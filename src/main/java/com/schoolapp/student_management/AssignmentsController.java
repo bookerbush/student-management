@@ -27,7 +27,6 @@ public class AssignmentsController {
             @RequestParam("worktodo") MultipartFile file
     ) {
         try {
-            // --- safer date parsing ---
             Date sqlDate;
             try {
                 sqlDate = Date.valueOf(dateStr.trim()); // must be YYYY-MM-DD
@@ -36,10 +35,8 @@ public class AssignmentsController {
                         .body("❌ Invalid date format: " + dateStr + ". Expected YYYY-MM-DD.");
             }
 
-            // --- read file ---
             byte[] fileData = file.getBytes();
 
-            // --- build assignment ---
             Assignments assignment = new Assignments();
             assignment.setClassName(className);
             assignment.setStream(stream);
@@ -48,15 +45,15 @@ public class AssignmentsController {
             assignment.setDate(sqlDate);
             assignment.setWorktodo(fileData);
 
-            // --- save assignment ---
             service.saveAssignment(assignment);
 
             return ResponseEntity.ok("✅ Assignment uploaded successfully.");
         } catch (IOException e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("❌ Error uploading file: " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // ✅ show root cause in logs
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("❌ Unexpected error: " + e.getMessage());
         }
@@ -64,26 +61,36 @@ public class AssignmentsController {
 
     // ✅ Get all assignments
     @GetMapping
-    public List<Assignments> getAllAssignments() {
-        return service.getAllAssignments();
+    public ResponseEntity<List<Assignments>> getAllAssignments() {
+        try {
+            List<Assignments> list = service.getAllAssignments();
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            e.printStackTrace(); // ✅ show in logs
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // ✅ Download assignment file (uses assigno as primary key)
     @GetMapping("/download/{assigno}")
     public ResponseEntity<byte[]> downloadAssignment(@PathVariable Long assigno) {
-        Assignments assignment = service.getAssignmentById(assigno);
-        if (assignment == null || assignment.getWorktodo() == null) {
-            return ResponseEntity.notFound().build();
+        try {
+            Assignments assignment = service.getAssignmentById(assigno);
+            if (assignment == null || assignment.getWorktodo() == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+            String filename = assignment.getSubject() + "_assignment_" + assignment.getAssigno() + ".bin";
+            headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
+            headers.setContentLength(assignment.getWorktodo().length);
+
+            return new ResponseEntity<>(assignment.getWorktodo(), headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace(); // ✅ log error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-        // ✅ Give a meaningful filename (subject + assigno)
-        String filename = assignment.getSubject() + "_assignment_" + assignment.getAssigno() + ".bin";
-        headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
-        headers.setContentLength(assignment.getWorktodo().length);
-
-        return new ResponseEntity<>(assignment.getWorktodo(), headers, HttpStatus.OK);
     }
 }
