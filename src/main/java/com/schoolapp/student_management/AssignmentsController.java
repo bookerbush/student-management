@@ -17,7 +17,7 @@ public class AssignmentsController {
     private AssignmentsService service;
 
     // ✅ Upload assignment with file
-    @PostMapping
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<String> uploadAssignment(
             @RequestParam("className") String className,
             @RequestParam("stream") String stream,
@@ -27,25 +27,38 @@ public class AssignmentsController {
             @RequestParam("worktodo") MultipartFile file
     ) {
         try {
+            // --- safer date parsing ---
+            Date sqlDate;
+            try {
+                sqlDate = Date.valueOf(dateStr.trim()); // must be YYYY-MM-DD
+            } catch (Exception ex) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("❌ Invalid date format: " + dateStr + ". Expected YYYY-MM-DD.");
+            }
+
+            // --- read file ---
             byte[] fileData = file.getBytes();
 
+            // --- build assignment ---
             Assignments assignment = new Assignments();
             assignment.setClassName(className);
             assignment.setStream(stream);
             assignment.setSubject(subject);
             assignment.setTeacher(teacher);
-            assignment.setDate(Date.valueOf(dateStr)); // expects "YYYY-MM-DD"
+            assignment.setDate(sqlDate);
             assignment.setWorktodo(fileData);
 
+            // --- save assignment ---
             service.saveAssignment(assignment);
 
             return ResponseEntity.ok("✅ Assignment uploaded successfully.");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("❌ Error uploading file: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("❌ Invalid date format. Use YYYY-MM-DD.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ Unexpected error: " + e.getMessage());
         }
     }
 
@@ -55,10 +68,10 @@ public class AssignmentsController {
         return service.getAllAssignments();
     }
 
-    // ✅ Download assignment file
-    @GetMapping("/download/{id}")
-    public ResponseEntity<byte[]> downloadAssignment(@PathVariable Long id) {
-        Assignments assignment = service.getAssignmentById(id);
+    // ✅ Download assignment file (uses assigno as primary key)
+    @GetMapping("/download/{assigno}")
+    public ResponseEntity<byte[]> downloadAssignment(@PathVariable Long assigno) {
+        Assignments assignment = service.getAssignmentById(assigno);
         if (assignment == null || assignment.getWorktodo() == null) {
             return ResponseEntity.notFound().build();
         }
@@ -66,8 +79,8 @@ public class AssignmentsController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
-        // Give a more meaningful filename (subject + id)
-        String filename = assignment.getSubject() + "_assignment_" + id + ".bin";
+        // ✅ Give a meaningful filename (subject + assigno)
+        String filename = assignment.getSubject() + "_assignment_" + assignment.getAssigno() + ".bin";
         headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
         headers.setContentLength(assignment.getWorktodo().length);
 
