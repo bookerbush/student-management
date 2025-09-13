@@ -38,7 +38,10 @@ public class MessageController {
             Message saved = service.saveMessage(admissionNumber, name, className, stream, msg, messageType, image);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            // 🔴 Print stacktrace so you can see the exact error in logs
+            System.err.println("❌ Error while saving message:");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -68,7 +71,7 @@ public class MessageController {
         return service.findByAdmissionNumber(admissionNumber);
     }
 
-    // ✅ NEW: Get messages for ParentMessagesView
+    // ✅ For ParentMessagesView
     @GetMapping("/parent/{admissionNumber}")
     public ResponseEntity<List<Message>> getMessagesForParent(@PathVariable String admissionNumber) {
         List<Message> messages = service.findByAdmissionNumber(admissionNumber);
