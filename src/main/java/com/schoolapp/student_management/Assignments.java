@@ -1,7 +1,7 @@
 package com.schoolapp.student_management;
 
 import jakarta.persistence.*;
-import java.sql.Date; // ✅ use sql.Date, not util.Date
+import java.sql.Date;
 
 @Entity
 @Table(name = "assignment")
@@ -11,16 +11,15 @@ public class Assignments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long assigno;
 
-    private String className;  // avoid using reserved word "class"
+    private String className;  // avoid reserved word "class"
     private String stream;
     private String subject;
 
     @Lob
-    @Basic(fetch = FetchType.LAZY) // ✅ ensures large files load only when needed
-    @Column(name = "worktodo", nullable = false)
+    @Column(name = "worktodo")  // ✅ Hibernate maps to LONGBLOB (MySQL) or BYTEA (Postgres)
     private byte[] worktodo;
 
-    private Date date; // ✅ sql.Date maps correctly in both MySQL & Postgres
+    private Date date; // ✅ using sql.Date (works well for DBs)
 
     private String teacher;
 
